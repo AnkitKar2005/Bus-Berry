@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -21,36 +22,37 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="bg-background shadow-sm border-b">
       <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">🚌</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">BusBooker</span>
+            <span className="text-2xl font-bold text-foreground">BusBooker</span>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">
+            <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
               Home
             </Link>
-            <Link to="/search" className="text-gray-600 hover:text-blue-600 transition-colors">
+            <Link to="/search" className="text-muted-foreground hover:text-primary transition-colors">
               Search
             </Link>
             {isLoggedIn && userRole === "operator" && (
-              <Link to="/operator" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link to="/operator" className="text-muted-foreground hover:text-primary transition-colors">
                 Operator Panel
               </Link>
             )}
             {isLoggedIn && userRole === "admin" && (
-              <Link to="/admin" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors">
                 Admin Panel
               </Link>
             )}
           </nav>
 
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 <Link to="/account">
