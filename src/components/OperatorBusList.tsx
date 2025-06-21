@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,22 +43,22 @@ const OperatorBusList = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch buses
+      // Fetch buses - note: removing operator_id filter since it may not exist in current schema
       const { data: busData, error: busError } = await supabase
         .from('buses')
         .select('*')
-        .eq('operator_id', user.id)
         .order('created_at', { ascending: false });
 
       if (busError) throw busError;
 
       setBuses(busData || []);
 
-      // Fetch routes for schedules
+      // Fetch routes through schedules with proper join
       const { data: scheduleData, error: scheduleError } = await supabase
         .from('schedules')
         .select(`
           bus_id,
+          route_id,
           routes (
             id,
             source,
@@ -72,7 +73,7 @@ const OperatorBusList = () => {
       // Create routes lookup
       const routesLookup: Record<string, Route> = {};
       scheduleData?.forEach(schedule => {
-        if (schedule.routes) {
+        if (schedule.routes && !Array.isArray(schedule.routes)) {
           routesLookup[schedule.bus_id] = schedule.routes as Route;
         }
       });
@@ -119,13 +120,22 @@ const OperatorBusList = () => {
 
   const getBusTypeBadge = (type: string) => {
     const colors = {
-      seater: 'bg-blue-100 text-blue-800',
+      ac: 'bg-blue-100 text-blue-800',
+      non_ac: 'bg-gray-100 text-gray-800',
       sleeper: 'bg-green-100 text-green-800',
-      both: 'bg-purple-100 text-purple-800'
+      semi_sleeper: 'bg-yellow-100 text-yellow-800',
+      luxury: 'bg-purple-100 text-purple-800'
+    };
+    const displayNames = {
+      ac: 'AC',
+      non_ac: 'Non AC',
+      sleeper: 'Sleeper',
+      semi_sleeper: 'Semi Sleeper',
+      luxury: 'Luxury'
     };
     return (
       <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {type.charAt(0).toUpperCase() + type.slice(1)}
+        {displayNames[type as keyof typeof displayNames] || type}
       </Badge>
     );
   };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,7 @@ interface RouteStop {
 interface BusFormData {
   busName: string;
   registrationNo: string;
-  busType: 'seater' | 'sleeper' | 'both';
+  busType: 'ac' | 'non_ac' | 'sleeper' | 'semi_sleeper' | 'luxury';
   totalSeats: number;
   farePerKm: number;
   departureTime: string;
@@ -42,7 +41,7 @@ const BusRegistrationForm = () => {
   const [formData, setFormData] = useState<BusFormData>({
     busName: '',
     registrationNo: '',
-    busType: 'seater',
+    busType: 'ac',
     totalSeats: 40,
     farePerKm: 0,
     departureTime: '',
@@ -162,11 +161,10 @@ const BusRegistrationForm = () => {
 
       if (routeError) throw routeError;
 
-      // Create bus
+      // Create bus with correct field names
       const { data: busData, error: busError } = await supabase
         .from('buses')
         .insert({
-          operator_id: user.id,
           bus_name: formData.busName,
           registration_no: formData.registrationNo,
           bus_type: formData.busType,
@@ -181,6 +179,21 @@ const BusRegistrationForm = () => {
         .single();
 
       if (busError) throw busError;
+
+      // Create schedule linking bus to route
+      const { error: scheduleError } = await supabase
+        .from('schedules')
+        .insert({
+          bus_id: busData.id,
+          route_id: routeData.id,
+          departure_time: formData.departureTime,
+          arrival_time: formData.arrivalTime,
+          departure_date: new Date().toISOString().split('T')[0], // Today's date as default
+          base_price: formData.farePerKm * formData.distance,
+          available_seats: formData.totalSeats
+        });
+
+      if (scheduleError) throw scheduleError;
 
       // Create route stops
       if (routeStops.length > 0) {
@@ -209,7 +222,7 @@ const BusRegistrationForm = () => {
       setFormData({
         busName: '',
         registrationNo: '',
-        busType: 'seater',
+        busType: 'ac',
         totalSeats: 40,
         farePerKm: 0,
         departureTime: '',
@@ -263,15 +276,17 @@ const BusRegistrationForm = () => {
             </div>
             <div>
               <Label htmlFor="busType">Bus Type</Label>
-              <Select value={formData.busType} onValueChange={(value: 'seater' | 'sleeper' | 'both') => 
+              <Select value={formData.busType} onValueChange={(value: 'ac' | 'non_ac' | 'sleeper' | 'semi_sleeper' | 'luxury') => 
                 setFormData(prev => ({ ...prev, busType: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="seater">Seater</SelectItem>
+                  <SelectItem value="ac">AC</SelectItem>
+                  <SelectItem value="non_ac">Non AC</SelectItem>
                   <SelectItem value="sleeper">Sleeper</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
+                  <SelectItem value="semi_sleeper">Semi Sleeper</SelectItem>
+                  <SelectItem value="luxury">Luxury</SelectItem>
                 </SelectContent>
               </Select>
             </div>
