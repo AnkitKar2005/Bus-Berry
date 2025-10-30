@@ -14,16 +14,417 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_reference: string
+          created_at: string | null
+          id: string
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          schedule_id: string | null
+          seat_numbers: number[]
+          status: Database["public"]["Enums"]["booking_status"] | null
+          total_fare: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_reference: string
+          created_at?: string | null
+          id?: string
+          passenger_email: string
+          passenger_name: string
+          passenger_phone: string
+          schedule_id?: string | null
+          seat_numbers: number[]
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_fare: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_reference?: string
+          created_at?: string | null
+          id?: string
+          passenger_email?: string
+          passenger_name?: string
+          passenger_phone?: string
+          schedule_id?: string | null
+          seat_numbers?: number[]
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          total_fare?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buses: {
+        Row: {
+          amenities: string[] | null
+          arrival_time: string
+          bus_name: string
+          bus_type: Database["public"]["Enums"]["bus_type"]
+          created_at: string | null
+          departure_time: string
+          fare_per_km: number
+          features: string[] | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          operator_id: string | null
+          registration_no: string
+          total_seats: number
+          updated_at: string | null
+        }
+        Insert: {
+          amenities?: string[] | null
+          arrival_time: string
+          bus_name: string
+          bus_type: Database["public"]["Enums"]["bus_type"]
+          created_at?: string | null
+          departure_time: string
+          fare_per_km: number
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          operator_id?: string | null
+          registration_no: string
+          total_seats: number
+          updated_at?: string | null
+        }
+        Update: {
+          amenities?: string[] | null
+          arrival_time?: string
+          bus_name?: string
+          bus_type?: Database["public"]["Enums"]["bus_type"]
+          created_at?: string | null
+          departure_time?: string
+          fare_per_km?: number
+          features?: string[] | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          operator_id?: string | null
+          registration_no?: string
+          total_seats?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buses_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean | null
+          max_discount: number | null
+          min_fare: number | null
+          usage_limit: number | null
+          used_count: number | null
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean | null
+          max_discount?: number | null
+          min_fare?: number | null
+          usage_limit?: number | null
+          used_count?: number | null
+          valid_from: string
+          valid_until: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean | null
+          max_discount?: number | null
+          min_fare?: number | null
+          usage_limit?: number | null
+          used_count?: number | null
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: []
+      }
+      operator_earnings: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          commission: number
+          created_at: string | null
+          id: string
+          net_amount: number
+          operator_id: string | null
+          status: string | null
+          withdrawn_at: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          commission: number
+          created_at?: string | null
+          id?: string
+          net_amount: number
+          operator_id?: string | null
+          status?: string | null
+          withdrawn_at?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          commission?: number
+          created_at?: string | null
+          id?: string
+          net_amount?: number
+          operator_id?: string | null
+          status?: string | null
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_earnings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operator_earnings_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          created_at: string | null
+          id: string
+          payment_method: string
+          status: Database["public"]["Enums"]["payment_status"] | null
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_method: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          created_at?: string | null
+          id?: string
+          payment_method?: string
+          status?: Database["public"]["Enums"]["payment_status"] | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      route_stops: {
+        Row: {
+          arrival_time: string
+          created_at: string | null
+          departure_time: string
+          fare_from_origin: number
+          id: string
+          route_id: string | null
+          stop_name: string
+          stop_order: number
+        }
+        Insert: {
+          arrival_time: string
+          created_at?: string | null
+          departure_time: string
+          fare_from_origin: number
+          id?: string
+          route_id?: string | null
+          stop_name: string
+          stop_order: number
+        }
+        Update: {
+          arrival_time?: string
+          created_at?: string | null
+          departure_time?: string
+          fare_from_origin?: number
+          id?: string
+          route_id?: string | null
+          stop_name?: string
+          stop_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routes: {
+        Row: {
+          created_at: string | null
+          destination: string
+          distance: number
+          duration: string | null
+          id: string
+          source: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          destination: string
+          distance: number
+          duration?: string | null
+          id?: string
+          source: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          destination?: string
+          distance?: number
+          duration?: string | null
+          id?: string
+          source?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      schedules: {
+        Row: {
+          available_seats: number
+          bus_id: string | null
+          created_at: string | null
+          departure_date: string
+          id: string
+          route_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          available_seats: number
+          bus_id?: string | null
+          created_at?: string | null
+          departure_date: string
+          id?: string
+          route_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          available_seats?: number
+          bus_id?: string | null
+          created_at?: string | null
+          departure_date?: string
+          id?: string
+          route_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedules_bus_id_fkey"
+            columns: ["bus_id"]
+            isOneToOne: false
+            referencedRelation: "buses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedules_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_booking_reference: { Args: never; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      booking_status: "pending" | "confirmed" | "cancelled" | "completed"
+      bus_type: "ac" | "non_ac" | "sleeper" | "semi_sleeper" | "luxury"
+      payment_status: "pending" | "completed" | "failed" | "refunded"
+      user_role: "passenger" | "operator" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +551,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      booking_status: ["pending", "confirmed", "cancelled", "completed"],
+      bus_type: ["ac", "non_ac", "sleeper", "semi_sleeper", "luxury"],
+      payment_status: ["pending", "completed", "failed", "refunded"],
+      user_role: ["passenger", "operator", "admin"],
+    },
   },
 } as const
