@@ -59,7 +59,7 @@ const OperatorBusList = () => {
         .select(`
           bus_id,
           route_id,
-          routes (
+          routes!route_id (
             id,
             source,
             destination,
