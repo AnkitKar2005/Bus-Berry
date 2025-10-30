@@ -120,7 +120,7 @@ const UserAccount = () => {
                       <div>
                         <Badge variant="outline">{booking.type}</Badge>
                         <span className="ml-2 text-sm text-gray-600">
-                          Seats: {booking.seats.join(', ')}
+                          Seats: {booking.seats?.join(', ') || 'N/A'}
                         </span>
                       </div>
                       
