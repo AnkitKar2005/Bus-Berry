@@ -93,7 +93,7 @@ const BusDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -112,7 +112,7 @@ const BusDetails = () => {
                   <div className="flex items-center">
                     <Star className="h-5 w-5 text-yellow-500 mr-1" />
                     <span className="font-medium">{bus.rating}</span>
-                    <span className="text-gray-500 text-sm ml-1">
+                    <span className="text-muted-foreground text-sm ml-1">
                       ({bus.totalRatings} reviews)
                     </span>
                   </div>
@@ -121,15 +121,15 @@ const BusDetails = () => {
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div className="text-center">
                     <div className="font-semibold text-xl">{bus.departureTime}</div>
-                    <div className="text-gray-600">{bus.from}</div>
+                    <div className="text-muted-foreground">{bus.from}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-gray-500">{bus.duration}</div>
-                    <div className="w-full h-px bg-gray-300 my-2"></div>
+                    <div className="text-muted-foreground">{bus.duration}</div>
+                    <div className="w-full h-px bg-border my-2"></div>
                   </div>
                   <div className="text-center">
                     <div className="font-semibold text-xl">{bus.arrivalTime}</div>
-                    <div className="text-gray-600">{bus.to}</div>
+                    <div className="text-muted-foreground">{bus.to}</div>
                   </div>
                 </div>
 
@@ -143,8 +143,8 @@ const BusDetails = () => {
               </div>
 
               <div className="text-right">
-                <div className="text-3xl font-bold text-blue-600">${bus.price}</div>
-                <div className="text-gray-500">per seat</div>
+                <div className="text-3xl font-bold text-primary">${bus.price}</div>
+                <div className="text-muted-foreground">per seat</div>
               </div>
             </div>
           </CardContent>

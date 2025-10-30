@@ -89,7 +89,7 @@ const Booking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -105,12 +105,12 @@ const Booking = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="font-semibold">{bus.operator}</h3>
-                    <p className="text-gray-600">{bus.from} → {bus.to}</p>
-                    <p className="text-sm text-gray-500">Seats: {selectedSeats?.join(', ')}</p>
+                    <p className="text-muted-foreground">{bus.from} → {bus.to}</p>
+                    <p className="text-sm text-muted-foreground">Seats: {selectedSeats?.join(', ')}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold">{bus.departureTime}</p>
-                    <p className="text-gray-600">{bus.type}</p>
+                    <p className="text-muted-foreground">{bus.type}</p>
                   </div>
                 </div>
               </CardContent>

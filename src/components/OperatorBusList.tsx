@@ -120,11 +120,11 @@ const OperatorBusList = () => {
 
   const getBusTypeBadge = (type: string) => {
     const colors = {
-      ac: 'bg-blue-100 text-blue-800',
-      non_ac: 'bg-gray-100 text-gray-800',
-      sleeper: 'bg-green-100 text-green-800',
-      semi_sleeper: 'bg-yellow-100 text-yellow-800',
-      luxury: 'bg-purple-100 text-purple-800'
+      ac: 'bg-primary/10 text-primary',
+      non_ac: 'bg-muted text-muted-foreground',
+      sleeper: 'bg-accent/10 text-accent-foreground',
+      semi_sleeper: 'bg-secondary/50 text-secondary-foreground',
+      luxury: 'bg-primary/20 text-primary'
     };
     const displayNames = {
       ac: 'AC',
@@ -134,7 +134,7 @@ const OperatorBusList = () => {
       luxury: 'Luxury'
     };
     return (
-      <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge className={colors[type as keyof typeof colors] || 'bg-muted text-muted-foreground'}>
         {displayNames[type as keyof typeof displayNames] || type}
       </Badge>
     );
@@ -154,9 +154,9 @@ const OperatorBusList = () => {
       {buses.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <Bus className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+            <Bus className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No buses registered</h3>
-            <p className="text-gray-500 mb-4">Start by registering your first bus</p>
+            <p className="text-muted-foreground mb-4">Start by registering your first bus</p>
           </CardContent>
         </Card>
       ) : (
@@ -193,11 +193,11 @@ const OperatorBusList = () => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-gray-500" />
+                      <Users className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm">{bus.total_seats} Seats</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
+                      <Clock className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm">
                         {bus.departure_time} - {bus.arrival_time}
                       </span>
@@ -207,7 +207,7 @@ const OperatorBusList = () => {
                     </div>
                     {route && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
                         <span className="text-sm">
                           {route.source} → {route.destination}
                         </span>

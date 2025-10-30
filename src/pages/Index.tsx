@@ -37,16 +37,16 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
       <Header />
       
       {/* Hero Section */}
       <div className="relative py-20 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl font-bold text-foreground mb-6">
             Book Your Bus Journey
           </h1>
-          <p className="text-xl text-gray-600 mb-12">
+          <p className="text-xl text-muted-foreground mb-12">
             Travel comfortably across the country with our premium bus services
           </p>
 
@@ -55,9 +55,9 @@ const Index = () => {
             <CardContent className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">From</label>
+                  <label className="text-sm font-medium text-foreground">From</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Departure city"
                       value={from}
@@ -68,9 +68,9 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">To</label>
+                  <label className="text-sm font-medium text-foreground">To</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       placeholder="Destination city"
                       value={to}
@@ -81,7 +81,7 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Date</label>
+                  <label className="text-sm font-medium text-foreground">Date</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -109,7 +109,7 @@ const Index = () => {
 
                 <Button 
                   onClick={handleSearch}
-                  className="bg-blue-600 hover:bg-blue-700 text-white py-6"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground py-6"
                   size="lg"
                 >
                   Search Buses
@@ -121,7 +121,7 @@ const Index = () => {
       </div>
 
       {/* Popular Routes */}
-      <div className="py-16 px-4 bg-white">
+      <div className="py-16 px-4 bg-card">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Popular Routes</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -129,16 +129,16 @@ const Index = () => {
               <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-center mb-4">
-                    <MapPin className="h-5 w-5 text-blue-600 mr-2" />
+                    <MapPin className="h-5 w-5 text-primary mr-2" />
                     <span className="font-semibold">{route.from}</span>
                   </div>
                   <div className="flex items-center mb-4">
-                    <MapPin className="h-5 w-5 text-green-600 mr-2" />
+                    <MapPin className="h-5 w-5 text-accent mr-2" />
                     <span className="font-semibold">{route.to}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-blue-600">{route.price}</span>
-                    <div className="flex items-center text-gray-500">
+                    <span className="text-2xl font-bold text-primary">{route.price}</span>
+                    <div className="flex items-center text-muted-foreground">
                       <Clock className="h-4 w-4 mr-1" />
                       <span className="text-sm">{route.duration}</span>
                     </div>
@@ -151,16 +151,16 @@ const Index = () => {
       </div>
 
       {/* Offers Section */}
-      <div className="py-16 px-4 bg-gradient-to-r from-green-50 to-blue-50">
+      <div className="py-16 px-4 bg-muted">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Special Offers</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {offers.map((offer, index) => (
-              <Card key={index} className="bg-gradient-to-br from-blue-600 to-purple-600 text-white hover:shadow-xl transition-shadow">
+              <Card key={index} className="bg-gradient-to-br from-primary to-accent text-primary-foreground hover:shadow-xl transition-shadow">
                 <CardContent className="p-6">
                   <div className="text-3xl font-bold mb-2">{offer.discount} OFF</div>
                   <h3 className="text-xl font-semibold mb-2">{offer.title}</h3>
-                  <p className="text-blue-100">{offer.description}</p>
+                  <p className="text-primary-foreground/80">{offer.description}</p>
                   <Button variant="secondary" className="mt-4 w-full">
                     Learn More
                   </Button>

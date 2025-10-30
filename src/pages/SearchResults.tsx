@@ -70,29 +70,29 @@ const SearchResults = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Search Summary */}
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
+        <div className="bg-card p-6 rounded-lg shadow-sm mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-blue-600 mr-2" />
+                <MapPin className="h-5 w-5 text-primary mr-2" />
                 <span className="font-semibold">{from}</span>
               </div>
-              <div className="w-8 h-px bg-gray-300"></div>
+              <div className="w-8 h-px bg-border"></div>
               <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-green-600 mr-2" />
+                <MapPin className="h-5 w-5 text-accent mr-2" />
                 <span className="font-semibold">{to}</span>
               </div>
               <div className="flex items-center">
-                <Clock className="h-5 w-5 text-gray-500 mr-2" />
+                <Clock className="h-5 w-5 text-muted-foreground mr-2" />
                 <span>{date}</span>
               </div>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               {buses.length} buses found
             </div>
           </div>
@@ -197,7 +197,7 @@ const SearchResults = () => {
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-yellow-500 mr-1" />
                           <span className="font-medium">{bus.rating}</span>
-                          <span className="text-gray-500 text-sm ml-1">
+                          <span className="text-muted-foreground text-sm ml-1">
                             ({bus.totalRatings})
                           </span>
                         </div>
@@ -206,15 +206,15 @@ const SearchResults = () => {
                       <div className="grid grid-cols-3 gap-4 mb-4">
                         <div className="text-center">
                           <div className="font-semibold text-lg">{bus.departureTime}</div>
-                          <div className="text-sm text-gray-500">{from}</div>
+                          <div className="text-sm text-muted-foreground">{from}</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-sm text-gray-500">{bus.duration}</div>
-                          <div className="w-full h-px bg-gray-300 my-1"></div>
+                          <div className="text-sm text-muted-foreground">{bus.duration}</div>
+                          <div className="w-full h-px bg-border my-1"></div>
                         </div>
                         <div className="text-center">
                           <div className="font-semibold text-lg">{bus.arrivalTime}</div>
-                          <div className="text-sm text-gray-500">{to}</div>
+                          <div className="text-sm text-muted-foreground">{to}</div>
                         </div>
                       </div>
 
@@ -226,7 +226,7 @@ const SearchResults = () => {
                         ))}
                       </div>
 
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <Users className="h-4 w-4 mr-1" />
                         <span>{bus.availableSeats} seats available</span>
                       </div>
@@ -235,8 +235,8 @@ const SearchResults = () => {
                     {/* Price and Book */}
                     <div className="flex flex-col justify-between">
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">${bus.price}</div>
-                        <div className="text-sm text-gray-500">per person</div>
+                        <div className="text-2xl font-bold text-primary">${bus.price}</div>
+                        <div className="text-sm text-muted-foreground">per person</div>
                       </div>
                       <Link to={`/bus/${bus.id}`}>
                         <Button className="w-full mt-4" size="lg">

@@ -71,13 +71,13 @@ const UserAccount = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">My Account</h1>
-          <p className="text-gray-600">Manage your bookings and account settings</p>
+          <p className="text-muted-foreground">Manage your bookings and account settings</p>
         </div>
 
         <Tabs defaultValue="bookings" className="space-y-6">
@@ -101,25 +101,25 @@ const UserAccount = () => {
                             {booking.status}
                           </Badge>
                         </div>
-                        <div className="flex items-center text-gray-600 mb-2">
+                        <div className="flex items-center text-muted-foreground mb-2">
                           <MapPin className="h-4 w-4 mr-1" />
                           <span>{booking.from} → {booking.to}</span>
                         </div>
-                        <div className="flex items-center text-gray-600">
+                        <div className="flex items-center text-muted-foreground">
                           <Calendar className="h-4 w-4 mr-1" />
                           <span>{booking.date} at {booking.time}</span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-blue-600">${booking.amount}</div>
-                        <div className="text-sm text-gray-500">Booking ID: {booking.id}</div>
+                        <div className="text-2xl font-bold text-primary">${booking.amount}</div>
+                        <div className="text-sm text-muted-foreground">Booking ID: {booking.id}</div>
                       </div>
                     </div>
 
                     <div className="flex justify-between items-center">
                       <div>
                         <Badge variant="outline">{booking.type}</Badge>
-                        <span className="ml-2 text-sm text-gray-600">
+                        <span className="ml-2 text-sm text-muted-foreground">
                           Seats: {booking.seats?.join(', ') || 'N/A'}
                         </span>
                       </div>
@@ -150,7 +150,7 @@ const UserAccount = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-600 mb-4">
+                  <div className="text-3xl font-bold text-primary mb-4">
                     ${walletBalance.toFixed(2)}
                   </div>
                   <div className="space-y-2">
@@ -188,8 +188,8 @@ const UserAccount = () => {
                 <CardTitle>My Reviews</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <Star className="h-12 w-12 mx-auto mb-4 text-muted" />
                   <p>No reviews yet. Complete a trip to leave your first review!</p>
                 </div>
               </CardContent>

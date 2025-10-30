@@ -480,10 +480,10 @@ const BusRegistrationForm = () => {
           {/* Image Upload */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Bus Images (Max 5)</h3>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+              <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
               <Label htmlFor="images" className="cursor-pointer">
-                <span className="text-blue-600 hover:text-blue-500">Click to upload images</span>
+                <span className="text-primary hover:text-primary/80">Click to upload images</span>
                 <Input
                   id="images"
                   type="file"

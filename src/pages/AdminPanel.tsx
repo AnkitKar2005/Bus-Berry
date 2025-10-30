@@ -65,13 +65,13 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-gray-600">Manage users, operators, and platform analytics</p>
+          <p className="text-muted-foreground">Manage users, operators, and platform analytics</p>
         </div>
 
         {/* Stats Overview */}
@@ -80,10 +80,10 @@ const AdminPanel = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Users</p>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
                   <p className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</p>
                 </div>
-                <Users className="h-8 w-8 text-blue-600" />
+                <Users className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
@@ -92,10 +92,10 @@ const AdminPanel = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Operators</p>
+                  <p className="text-sm text-muted-foreground">Operators</p>
                   <p className="text-2xl font-bold">{stats.totalOperators}</p>
                 </div>
-                <Bus className="h-8 w-8 text-green-600" />
+                <Bus className="h-8 w-8 text-primary" />
               </div>
             </CardContent>
           </Card>
