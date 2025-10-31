@@ -1,24 +1,58 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 const Header = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<"customer" | "operator" | "admin">("customer");
+  const [session, setSession] = useState<Session | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (role: "customer" | "operator" | "admin") => {
-    setIsLoggedIn(true);
-    setUserRole(role);
-    if (role === "operator") navigate("/operator");
-    if (role === "admin") navigate("/admin");
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        if (session?.user) {
+          fetchUserRole(session.user.id);
+        } else {
+          setUserRole(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchUserRole = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (data) {
+      setUserRole(data.role);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
+    navigate("/");
   };
 
   return (
@@ -39,12 +73,12 @@ const Header = () => {
             <Link to="/search" className="text-muted-foreground hover:text-primary transition-colors">
               Search
             </Link>
-            {isLoggedIn && userRole === "operator" && (
+            {session && userRole === "operator" && (
               <Link to="/operator" className="text-muted-foreground hover:text-primary transition-colors">
                 Operator Panel
               </Link>
             )}
-            {isLoggedIn && userRole === "admin" && (
+            {session && userRole === "admin" && (
               <Link to="/admin" className="text-muted-foreground hover:text-primary transition-colors">
                 Admin Panel
               </Link>
@@ -53,7 +87,7 @@ const Header = () => {
 
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            {isLoggedIn ? (
+            {session ? (
               <div className="flex items-center space-x-4">
                 <Link to="/account">
                   <Button variant="ghost" size="sm">
@@ -64,83 +98,18 @@ const Header = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={handleLogout}
                 >
                   Logout
                 </Button>
               </div>
             ) : (
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Login to BusBooker</DialogTitle>
-                  </DialogHeader>
-                  <Tabs defaultValue="customer" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="customer">Customer</TabsTrigger>
-                      <TabsTrigger value="operator">Operator</TabsTrigger>
-                      <TabsTrigger value="admin">Admin</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="customer" className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" placeholder="Enter your email" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" placeholder="Enter password" />
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleLogin("customer")}
-                      >
-                        Login as Customer
-                      </Button>
-                    </TabsContent>
-                    
-                    <TabsContent value="operator" className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="operator-email">Email</Label>
-                        <Input id="operator-email" placeholder="Enter your email" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="operator-password">Password</Label>
-                        <Input id="operator-password" type="password" placeholder="Enter password" />
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleLogin("operator")}
-                      >
-                        Login as Operator
-                      </Button>
-                    </TabsContent>
-                    
-                    <TabsContent value="admin" className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="admin-email">Email</Label>
-                        <Input id="admin-email" placeholder="Enter your email" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="admin-password">Password</Label>
-                        <Input id="admin-password" type="password" placeholder="Enter password" />
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={() => handleLogin("admin")}
-                      >
-                        Login as Admin
-                      </Button>
-                    </TabsContent>
-                  </Tabs>
-                </DialogContent>
-              </Dialog>
+              <Link to="/auth">
+                <Button variant="outline" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
         </div>
