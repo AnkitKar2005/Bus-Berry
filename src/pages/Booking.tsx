@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,21 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle, CreditCard, Wallet } from "lucide-react";
 import Header from "@/components/Header";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const passengerSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
+  age: z.string().refine((val) => {
+    const age = parseInt(val);
+    return !isNaN(age) && age >= 1 && age <= 120;
+  }, "Age must be between 1 and 120"),
+  gender: z.enum(["male", "female", "other"], { required_error: "Please select a gender" }),
+});
+
+const contactSchema = z.object({
+  email: z.string().trim().email("Invalid email address").max(255, "Email must be less than 255 characters"),
+  phone: z.string().trim().regex(/^[+]?[0-9]{10,15}$/, "Phone number must be 10-15 digits"),
+});
 
 const Booking = () => {
   const location = useLocation();
@@ -54,13 +68,26 @@ const Booking = () => {
   };
 
   const handleBooking = () => {
-    // Validate passenger details
-    const isValid = passengers.every(p => p.name && p.age && p.gender) && 
-                   contactInfo.email && contactInfo.phone;
-    
-    if (!isValid) {
-      toast.error("Please fill all passenger details");
-      return;
+    // Validate contact information
+    try {
+      contactSchema.parse(contactInfo);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
+    // Validate all passengers
+    for (let i = 0; i < passengers.length; i++) {
+      try {
+        passengerSchema.parse(passengers[i]);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast.error(`Passenger ${i + 1}: ${error.errors[0].message}`);
+          return;
+        }
+      }
     }
 
     // Simulate booking process

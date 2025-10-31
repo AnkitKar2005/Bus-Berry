@@ -90,10 +90,7 @@ const OperatorEarnings = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // In a real implementation, you would integrate with a payment gateway
-      // For now, we'll simulate the withdrawal process
-      
-      // Find pending earnings to mark as withdrawn
+      // Find pending earnings to mark for withdrawal request
       const { data: pendingEarnings, error: fetchError } = await supabase
         .from('operator_earnings')
         .select('*')
@@ -115,20 +112,20 @@ const OperatorEarnings = () => {
         }
       }
 
-      // Update earnings status to withdrawn
+      // Mark earnings as pending_review instead of withdrawn
+      // This creates a withdrawal request that requires admin approval
       const { error: updateError } = await supabase
         .from('operator_earnings')
         .update({ 
-          status: 'withdrawn', 
-          withdrawn_at: new Date().toISOString() 
+          status: 'pending_review'
         })
         .in('id', earningsToUpdate);
 
       if (updateError) throw updateError;
 
       toast({
-        title: "Withdrawal Successful",
-        description: `₹${amount.toFixed(2)} has been processed for withdrawal`
+        title: "Withdrawal Request Submitted",
+        description: `₹${amount.toFixed(2)} withdrawal request has been submitted for admin review. You will be notified once approved and processed.`
       });
 
       setWithdrawAmount('');
@@ -148,9 +145,11 @@ const OperatorEarnings = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge variant="secondary">Available</Badge>;
+      case 'pending_review':
+        return <Badge variant="outline">Under Review</Badge>;
       case 'withdrawn':
-        return <Badge variant="default">Withdrawn</Badge>;
+        return <Badge variant="default">Completed</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }

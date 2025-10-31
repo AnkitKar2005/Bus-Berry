@@ -10,6 +10,19 @@ import { Badge } from '@/components/ui/badge';
 import { X, Plus, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+
+const busRegistrationSchema = z.object({
+  busName: z.string().trim().min(3, "Bus name must be at least 3 characters").max(100, "Bus name must be less than 100 characters"),
+  registrationNo: z.string().trim().min(5, "Registration number must be at least 5 characters").max(20, "Registration number must be less than 20 characters"),
+  totalSeats: z.number().int().min(10, "Must have at least 10 seats").max(100, "Cannot exceed 100 seats"),
+  farePerKm: z.number().positive("Fare must be positive").max(100, "Fare per km cannot exceed ₹100"),
+  departureTime: z.string().min(1, "Departure time is required"),
+  arrivalTime: z.string().min(1, "Arrival time is required"),
+  source: z.string().trim().min(2, "Source must be at least 2 characters").max(100, "Source must be less than 100 characters"),
+  destination: z.string().trim().min(2, "Destination must be at least 2 characters").max(100, "Destination must be less than 100 characters"),
+  distance: z.number().positive("Distance must be positive").max(5000, "Distance cannot exceed 5000 km"),
+});
 
 interface RouteStop {
   stopName: string;
@@ -138,6 +151,31 @@ const BusRegistrationForm = () => {
     setIsLoading(true);
 
     try {
+      // Validate form data
+      try {
+        busRegistrationSchema.parse({
+          busName: formData.busName,
+          registrationNo: formData.registrationNo,
+          totalSeats: formData.totalSeats,
+          farePerKm: formData.farePerKm,
+          departureTime: formData.departureTime,
+          arrivalTime: formData.arrivalTime,
+          source: formData.source,
+          destination: formData.destination,
+          distance: formData.distance,
+        });
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          toast({
+            title: "Validation Error",
+            description: validationError.errors[0].message,
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
