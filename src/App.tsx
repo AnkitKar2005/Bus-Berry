@@ -14,6 +14,7 @@ import Booking from "./pages/Booking";
 import UserAccount from "./pages/UserAccount";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import AdminPanel from "./pages/AdminPanel";
+import AdminLogin from "./pages/AdminLogin";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -22,10 +23,12 @@ const queryClient = new QueryClient();
 // Protected Route Component
 const ProtectedRoute = ({ 
   children, 
-  requiredRole 
+  requiredRole,
+  adminRedirect
 }: { 
   children: React.ReactNode; 
   requiredRole?: 'admin' | 'operator' | 'passenger';
+  adminRedirect?: string;
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -67,10 +70,18 @@ const ProtectedRoute = ({
   }
 
   if (!isAuthenticated) {
+    // If trying to access admin panel, redirect to admin login
+    if (requiredRole === 'admin' && adminRedirect) {
+      return <Navigate to={adminRedirect} replace />;
+    }
     return <Navigate to="/auth" replace />;
   }
 
   if (requiredRole && !hasRole) {
+    // If logged in but not admin, redirect to admin login page
+    if (requiredRole === 'admin' && adminRedirect) {
+      return <Navigate to={adminRedirect} replace />;
+    }
     return <Navigate to="/" replace />;
   }
 
@@ -87,6 +98,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/bus/:id" element={<BusDetails />} />
           <Route path="/booking" element={<Booking />} />
@@ -101,7 +113,7 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/admin" element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute requiredRole="admin" adminRedirect="/admin/login">
               <AdminPanel />
             </ProtectedRoute>
           } />
