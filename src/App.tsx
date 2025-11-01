@@ -17,6 +17,7 @@ import AdminPanel from "./pages/AdminPanel";
 import Auth from "./pages/Auth";
 import AdminLogin from "./pages/AdminLogin";
 import AdminSetup from "./pages/AdminSetup";
+import QRScanner from "./pages/QRScanner";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -117,6 +118,11 @@ const App = () => (
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin" adminRedirect="/admin/login">
               <AdminPanel />
+            </ProtectedRoute>
+          } />
+          <Route path="/qr-scanner" element={
+            <ProtectedRoute requiredRole="operator">
+              <QRScanner />
             </ProtectedRoute>
           } />
           <Route path="*" element={<NotFound />} />

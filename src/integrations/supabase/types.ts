@@ -17,11 +17,14 @@ export type Database = {
       bookings: {
         Row: {
           booking_reference: string
+          cancelled_at: string | null
           created_at: string | null
           id: string
           passenger_email: string
           passenger_name: string
           passenger_phone: string
+          payment_verified: boolean | null
+          qr_code_data: string | null
           schedule_id: string | null
           seat_numbers: number[]
           status: Database["public"]["Enums"]["booking_status"] | null
@@ -31,11 +34,14 @@ export type Database = {
         }
         Insert: {
           booking_reference: string
+          cancelled_at?: string | null
           created_at?: string | null
           id?: string
           passenger_email: string
           passenger_name: string
           passenger_phone: string
+          payment_verified?: boolean | null
+          qr_code_data?: string | null
           schedule_id?: string | null
           seat_numbers: number[]
           status?: Database["public"]["Enums"]["booking_status"] | null
@@ -45,11 +51,14 @@ export type Database = {
         }
         Update: {
           booking_reference?: string
+          cancelled_at?: string | null
           created_at?: string | null
           id?: string
           passenger_email?: string
           passenger_name?: string
           passenger_phone?: string
+          payment_verified?: boolean | null
+          qr_code_data?: string | null
           schedule_id?: string | null
           seat_numbers?: number[]
           status?: Database["public"]["Enums"]["booking_status"] | null
@@ -77,6 +86,7 @@ export type Database = {
       buses: {
         Row: {
           amenities: string[] | null
+          approval_status: string | null
           arrival_time: string
           bus_name: string
           bus_type: Database["public"]["Enums"]["bus_type"]
@@ -94,6 +104,7 @@ export type Database = {
         }
         Insert: {
           amenities?: string[] | null
+          approval_status?: string | null
           arrival_time: string
           bus_name: string
           bus_type: Database["public"]["Enums"]["bus_type"]
@@ -111,6 +122,7 @@ export type Database = {
         }
         Update: {
           amenities?: string[] | null
+          approval_status?: string | null
           arrival_time?: string
           bus_name?: string
           bus_type?: Database["public"]["Enums"]["bus_type"]
@@ -275,6 +287,7 @@ export type Database = {
           created_at: string | null
           full_name: string | null
           id: string
+          last_active: string | null
           phone: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
@@ -283,6 +296,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id: string
+          last_active?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
@@ -291,6 +305,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+          last_active?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
@@ -439,6 +454,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_cancel_booking: { Args: { booking_id: string }; Returns: boolean }
       generate_booking_reference: { Args: never; Returns: string }
       has_role: {
         Args: {

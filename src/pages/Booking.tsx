@@ -11,6 +11,7 @@ import { CheckCircle, CreditCard, Wallet } from "lucide-react";
 import Header from "@/components/Header";
 import { toast } from "sonner";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const passengerSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name must be less than 100 characters"),
@@ -67,7 +68,7 @@ const Booking = () => {
     }
   };
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     // Validate contact information
     try {
       contactSchema.parse(contactInfo);
@@ -90,22 +91,75 @@ const Booking = () => {
       }
     }
 
-    // Simulate booking process
-    toast.success("Booking confirmed! Redirecting to confirmation...");
-    setTimeout(() => {
-      navigate('/account', { 
-        state: { 
-          bookingConfirmed: true, 
-          bookingDetails: {
-            bus,
-            passengers,
-            selectedSeats,
-            totalAmount: finalAmount,
-            bookingId: `BK${Date.now()}`,
-          }
-        } 
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please log in to complete booking");
+        return;
+      }
+
+      // Generate booking reference
+      const bookingRef = `BUS-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+      
+      // Create QR code data
+      const qrData = JSON.stringify({
+        ref: bookingRef,
+        passengers: passengers.length,
+        from: bus.from,
+        to: bus.to,
+        date: bus.date,
       });
-    }, 2000);
+
+      // Insert booking into database
+      const { data: bookingData, error: bookingError } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: user.id,
+          schedule_id: bus.scheduleId,
+          booking_reference: bookingRef,
+          passenger_name: passengers[0].name,
+          passenger_email: contactInfo.email,
+          passenger_phone: contactInfo.phone,
+          seat_numbers: selectedSeats,
+          total_fare: finalAmount,
+          status: 'confirmed',
+          payment_verified: true,
+          qr_code_data: qrData,
+        })
+        .select()
+        .single();
+
+      if (bookingError) throw bookingError;
+
+      // Update available seats
+      const { error: updateError } = await supabase
+        .from('schedules')
+        .update({ 
+          available_seats: bus.availableSeats - selectedSeats.length 
+        })
+        .eq('id', bus.scheduleId);
+
+      if (updateError) throw updateError;
+
+      toast.success("Payment successful! Booking confirmed!");
+      setTimeout(() => {
+        navigate('/account', { 
+          state: { 
+            bookingConfirmed: true, 
+            bookingDetails: {
+              ...bookingData,
+              bus,
+              passengers,
+              selectedSeats,
+              bookingId: bookingData.id,
+            }
+          } 
+        });
+      }, 1500);
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error("Failed to complete booking. Please try again.");
+    }
   };
 
   const serviceTax = Math.round(totalAmount * 0.1);
