@@ -10,23 +10,24 @@ import { z } from "zod";
 import { Shield } from "lucide-react";
 
 const adminLoginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 const AdminLogin = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     try {
       // Validate input
       adminLoginSchema.parse({ email, password });
+      
+      setLoading(true);
 
       // Attempt login
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -34,7 +35,15 @@ const AdminLogin = () => {
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        toast.error("Invalid admin credentials");
+        return;
+      }
+
+      if (!authData.user) {
+        toast.error("Login failed");
+        return;
+      }
 
       // Verify admin role
       const { data: roleData, error: roleError } = await supabase
@@ -42,13 +51,12 @@ const AdminLogin = () => {
         .select("role")
         .eq("user_id", authData.user.id)
         .eq("role", "admin")
-        .single();
+        .maybeSingle();
 
       if (roleError || !roleData) {
         // Not an admin, sign them out
         await supabase.auth.signOut();
-        toast.error("Access denied. Admin credentials required.");
-        setLoading(false);
+        toast.error("Access denied: Admin privileges required");
         return;
       }
 
@@ -57,10 +65,8 @@ const AdminLogin = () => {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
-      } else if (error instanceof Error) {
-        toast.error(error.message);
       } else {
-        toast.error("Invalid credentials");
+        toast.error("Login failed");
       }
     } finally {
       setLoading(false);
@@ -68,15 +74,17 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="space-y-3 text-center">
-          <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Shield className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-primary/10 rounded-full">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold">Admin Access</CardTitle>
           <CardDescription>
-            Enter administrator credentials to access the admin panel
+            Restricted access for administrators only
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -91,11 +99,10 @@ const AdminLogin = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Admin Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -104,23 +111,22 @@ const AdminLogin = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
-                autoComplete="current-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Authenticating..." : "Login as Admin"}
+              {loading ? "Verifying..." : "Login as Admin"}
             </Button>
+            <div className="text-center">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => navigate("/")}
+                className="text-sm"
+              >
+                Back to Home
+              </Button>
+            </div>
           </form>
-          <div className="mt-6 text-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/")}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              ← Back to Home
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>

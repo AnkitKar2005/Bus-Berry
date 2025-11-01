@@ -14,8 +14,9 @@ import Booking from "./pages/Booking";
 import UserAccount from "./pages/UserAccount";
 import OperatorDashboard from "./pages/OperatorDashboard";
 import AdminPanel from "./pages/AdminPanel";
-import AdminLogin from "./pages/AdminLogin";
 import Auth from "./pages/Auth";
+import AdminLogin from "./pages/AdminLogin";
+import AdminSetup from "./pages/AdminSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +100,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/setup" element={<AdminSetup />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/bus/:id" element={<BusDetails />} />
           <Route path="/booking" element={<Booking />} />
