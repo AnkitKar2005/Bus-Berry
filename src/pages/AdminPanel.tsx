@@ -179,14 +179,6 @@ const AdminPanel = () => {
     },
   ]);
 
-  const stats = {
-    totalUsers: 1247,
-    totalOperators: 23,
-    totalBookings: 3456,
-    totalRevenue: 234567,
-    monthlyGrowth: 12.5,
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />

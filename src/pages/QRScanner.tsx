@@ -18,6 +18,7 @@ interface BookingDetails {
   total_fare: number;
   status: string;
   created_at: string;
+  cancelled_at: string | null;
   schedule: {
     departure_date: string;
     bus: {
