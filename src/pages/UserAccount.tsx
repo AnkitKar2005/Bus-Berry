@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, MapPin, Download, Star, Wallet, CheckCircle, AlertCircle } from "lucide-react";
 import Header from "@/components/Header";
+import ReviewForm from "@/components/ReviewForm";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import BookingTicket from "@/components/BookingTicket";
@@ -28,6 +29,7 @@ const UserAccount = () => {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [showTicket, setShowTicket] = useState(false);
   const [cancelDialog, setCancelDialog] = useState<string | null>(null);
+  const [reviewBooking, setReviewBooking] = useState<any>(null);
 
   useEffect(() => {
     loadBookings();
@@ -198,17 +200,27 @@ const UserAccount = () => {
                         
                         <div className="flex gap-2">
                           {booking.status === "confirmed" && booking.payment_verified && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                setSelectedBooking(booking);
-                                setShowTicket(true);
-                              }}
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              View Ticket
-                            </Button>
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setShowTicket(true);
+                                }}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                View Ticket
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setReviewBooking(booking)}
+                              >
+                                <Star className="h-4 w-4 mr-2" />
+                                Review
+                              </Button>
+                            </>
                           )}
                           
                           {booking.status === "confirmed" && !booking.cancelled_at && (
@@ -349,6 +361,28 @@ const UserAccount = () => {
                 contactPhone={selectedBooking.passenger_phone}
                 bookingDate={selectedBooking.created_at}
                 qrCodeData={selectedBooking.qr_code_data}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Review Modal */}
+        {reviewBooking && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-background rounded-lg max-w-md w-full p-4">
+              <div className="flex justify-end mb-4">
+                <Button variant="ghost" onClick={() => setReviewBooking(null)}>
+                  Close
+                </Button>
+              </div>
+              <ReviewForm
+                bookingId={reviewBooking.id}
+                busId={reviewBooking.schedule?.bus?.id}
+                operatorId={reviewBooking.schedule?.bus?.operator_id}
+                onSuccess={() => {
+                  setReviewBooking(null);
+                  loadBookings();
+                }}
               />
             </div>
           </div>

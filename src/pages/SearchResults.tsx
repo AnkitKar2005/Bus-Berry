@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Clock, Star, Users, Wifi, Car } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import AdvancedSearchFilters from "@/components/AdvancedSearchFilters";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -17,14 +18,18 @@ const SearchResults = () => {
   const date = searchParams.get("date");
 
   const [sortBy, setSortBy] = useState("price");
-  const [filters, setFilters] = useState({
-    ac: false,
-    nonAc: false,
-    sleeper: false,
-    seater: false,
+  const [buses, setBuses] = useState<any[]>([]);
+  const [filteredBuses, setFilteredBuses] = useState<any[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    minRating: 0,
+    maxPrice: 1000,
+    amenities: [] as string[],
+    busTypes: [] as string[],
   });
 
-  const buses = [
+  useEffect(() => {
+    // Mock data for now - replace with actual API call
+    const mockBuses = [
     {
       id: 1,
       operator: "Luxury Express",
@@ -68,6 +73,44 @@ const SearchResults = () => {
       totalSeats: 42,
     },
   ];
+    
+    setBuses(mockBuses);
+    setFilteredBuses(mockBuses);
+  }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [buses, advancedFilters]);
+
+  const applyFilters = () => {
+    let result = [...buses];
+
+    // Rating filter
+    if (advancedFilters.minRating > 0) {
+      result = result.filter(bus => bus.rating >= advancedFilters.minRating);
+    }
+
+    // Price filter
+    result = result.filter(bus => bus.price <= advancedFilters.maxPrice);
+
+    // Bus type filter
+    if (advancedFilters.busTypes.length > 0) {
+      result = result.filter(bus =>
+        advancedFilters.busTypes.some(type => bus.type.toLowerCase().includes(type.toLowerCase()))
+      );
+    }
+
+    // Amenities filter
+    if (advancedFilters.amenities.length > 0) {
+      result = result.filter(bus =>
+        advancedFilters.amenities.every(amenity =>
+          bus.amenities.some((a: string) => a.toLowerCase().includes(amenity.toLowerCase()))
+        )
+      );
+    }
+
+    setFilteredBuses(result);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +136,7 @@ const SearchResults = () => {
               </div>
             </div>
             <div className="text-sm text-muted-foreground">
-              {buses.length} buses found
+              {filteredBuses.length} buses found
             </div>
           </div>
         </div>
@@ -101,65 +144,7 @@ const SearchResults = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Filters</h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-medium mb-2">Bus Type</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="ac" 
-                          checked={filters.ac}
-                          onCheckedChange={(checked) => 
-                            setFilters(prev => ({ ...prev, ac: !!checked }))
-                          }
-                        />
-                        <label htmlFor="ac" className="text-sm">AC</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="nonAc" 
-                          checked={filters.nonAc}
-                          onCheckedChange={(checked) => 
-                            setFilters(prev => ({ ...prev, nonAc: !!checked }))
-                          }
-                        />
-                        <label htmlFor="nonAc" className="text-sm">Non-AC</label>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium mb-2">Seat Type</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="sleeper" 
-                          checked={filters.sleeper}
-                          onCheckedChange={(checked) => 
-                            setFilters(prev => ({ ...prev, sleeper: !!checked }))
-                          }
-                        />
-                        <label htmlFor="sleeper" className="text-sm">Sleeper</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="seater" 
-                          checked={filters.seater}
-                          onCheckedChange={(checked) => 
-                            setFilters(prev => ({ ...prev, seater: !!checked }))
-                          }
-                        />
-                        <label htmlFor="seater" className="text-sm">Seater</label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AdvancedSearchFilters onFilterChange={setAdvancedFilters} />
           </div>
 
           {/* Results */}
@@ -181,7 +166,15 @@ const SearchResults = () => {
             </div>
 
             {/* Bus List */}
-            {buses.map((bus) => (
+            {filteredBuses.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <MapPin className="h-12 w-12 mx-auto mb-4 text-muted" />
+                  <p className="text-muted-foreground">No buses match your filters.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredBuses.map((bus) => (
               <Card key={bus.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -247,7 +240,7 @@ const SearchResults = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )))}
           </div>
         </div>
       </div>

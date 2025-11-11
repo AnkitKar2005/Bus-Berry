@@ -88,6 +88,7 @@ export type Database = {
           amenities: string[] | null
           approval_status: string | null
           arrival_time: string
+          average_rating: number | null
           bus_name: string
           bus_type: Database["public"]["Enums"]["bus_type"]
           created_at: string | null
@@ -99,6 +100,7 @@ export type Database = {
           is_active: boolean | null
           operator_id: string | null
           registration_no: string
+          total_reviews: number | null
           total_seats: number
           updated_at: string | null
         }
@@ -106,6 +108,7 @@ export type Database = {
           amenities?: string[] | null
           approval_status?: string | null
           arrival_time: string
+          average_rating?: number | null
           bus_name: string
           bus_type: Database["public"]["Enums"]["bus_type"]
           created_at?: string | null
@@ -117,6 +120,7 @@ export type Database = {
           is_active?: boolean | null
           operator_id?: string | null
           registration_no: string
+          total_reviews?: number | null
           total_seats: number
           updated_at?: string | null
         }
@@ -124,6 +128,7 @@ export type Database = {
           amenities?: string[] | null
           approval_status?: string | null
           arrival_time?: string
+          average_rating?: number | null
           bus_name?: string
           bus_type?: Database["public"]["Enums"]["bus_type"]
           created_at?: string | null
@@ -135,6 +140,7 @@ export type Database = {
           is_active?: boolean | null
           operator_id?: string | null
           registration_no?: string
+          total_reviews?: number | null
           total_seats?: number
           updated_at?: string | null
         }
@@ -190,6 +196,39 @@ export type Database = {
           used_count?: number | null
           valid_from?: string
           valid_until?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -311,6 +350,57 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          booking_id: string
+          bus_id: string
+          comment: string | null
+          created_at: string | null
+          id: string
+          operator_id: string
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          bus_id: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          operator_id: string
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          bus_id?: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          operator_id?: string
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_bus_id_fkey"
+            columns: ["bus_id"]
+            isOneToOne: false
+            referencedRelation: "buses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       route_stops: {
         Row: {
@@ -456,6 +546,17 @@ export type Database = {
     Functions: {
       can_cancel_booking: { Args: { booking_id: string }; Returns: boolean }
       generate_booking_reference: { Args: never; Returns: string }
+      get_analytics_stats: {
+        Args: { days_back?: number }
+        Returns: {
+          bookings_trend: Json
+          revenue_trend: Json
+          total_bookings: number
+          total_buses: number
+          total_revenue: number
+          total_users: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

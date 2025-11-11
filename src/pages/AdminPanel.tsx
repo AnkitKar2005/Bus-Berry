@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, Bus, MapPin, DollarSign, TrendingUp, AlertCircle, Shield, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -252,12 +253,16 @@ const AdminPanel = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="buses" className="space-y-6">
+        <Tabs defaultValue="analytics" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="buses">Bus Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
+          </TabsContent>
 
           <TabsContent value="buses" className="space-y-6">
             <div className="flex justify-between items-center">

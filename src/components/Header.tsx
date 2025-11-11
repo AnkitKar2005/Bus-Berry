@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { User, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -86,6 +87,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {session && <NotificationBell />}
             <ThemeToggle />
             {session ? (
               <div className="flex items-center space-x-4">

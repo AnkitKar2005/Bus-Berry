@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Clock, Star, Users, Wifi, Car, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
+import ReviewsList from "@/components/ReviewsList";
 
 const BusDetails = () => {
   const { id } = useParams();
@@ -281,6 +282,12 @@ const BusDetails = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Reviews & Ratings</h2>
+          <ReviewsList busId={id!} />
         </div>
       </div>
     </div>
