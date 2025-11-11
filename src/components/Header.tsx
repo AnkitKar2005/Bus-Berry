@@ -5,6 +5,7 @@ import { User, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import NotificationBell from "@/components/NotificationBell";
+import LocationSelector from "@/components/LocationSelector";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
@@ -66,6 +67,8 @@ const Header = () => {
             </div>
             <span className="text-2xl font-bold text-foreground">BusBooker</span>
           </Link>
+
+          <LocationSelector />
 
           <nav className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">

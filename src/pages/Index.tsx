@@ -2,33 +2,29 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, MapPin, Users, Star, Clock } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
+import PopularRoutes from "@/components/PopularRoutes";
+import { useLocation } from "@/contexts/LocationContext";
 
 const Index = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [date, setDate] = useState<Date>();
   const navigate = useNavigate();
+  const { selectedState } = useLocation();
 
   const handleSearch = () => {
     if (from && to && date) {
       navigate(`/search?from=${from}&to=${to}&date=${format(date, "yyyy-MM-dd")}`);
     }
   };
-
-  const popularRoutes = [
-    { from: "New York", to: "Washington DC", price: "$45", duration: "4h 30m" },
-    { from: "Los Angeles", to: "San Francisco", price: "$89", duration: "8h 15m" },
-    { from: "Chicago", to: "Detroit", price: "$35", duration: "5h 45m" },
-    { from: "Miami", to: "Orlando", price: "$25", duration: "3h 20m" },
-  ];
 
   const offers = [
     { title: "First Ride Free", description: "Get your first ticket absolutely free", discount: "100%" },
@@ -53,32 +49,29 @@ const Index = () => {
           {/* Search Form */}
           <Card className="max-w-4xl mx-auto shadow-xl">
             <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">From</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Departure city"
+              {!selectedState ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Please select a country and state to search for buses</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">From</label>
+                    <LocationAutocomplete
                       value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                      className="pl-10"
+                      onChange={setFrom}
+                      placeholder="Departure city"
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">To</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Destination city"
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground">To</label>
+                    <LocationAutocomplete
                       value={to}
-                      onChange={(e) => setTo(e.target.value)}
-                      className="pl-10"
+                      onChange={setTo}
+                      placeholder="Destination city"
                     />
                   </div>
-                </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-foreground">Date</label>
@@ -107,48 +100,28 @@ const Index = () => {
                   </Popover>
                 </div>
 
-                <Button 
-                  onClick={handleSearch}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground py-6"
-                  size="lg"
-                >
-                  Search Buses
-                </Button>
-              </div>
+                  <Button 
+                    onClick={handleSearch}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground py-6"
+                    size="lg"
+                  >
+                    Search Buses
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
 
       {/* Popular Routes */}
-      <div className="py-16 px-4 bg-card">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Popular Routes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularRoutes.map((route, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <MapPin className="h-5 w-5 text-primary mr-2" />
-                    <span className="font-semibold">{route.from}</span>
-                  </div>
-                  <div className="flex items-center mb-4">
-                    <MapPin className="h-5 w-5 text-accent mr-2" />
-                    <span className="font-semibold">{route.to}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-primary">{route.price}</span>
-                    <div className="flex items-center text-muted-foreground">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{route.duration}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      {selectedState && (
+        <div className="py-16 px-4 bg-card">
+          <div className="max-w-6xl mx-auto">
+            <PopularRoutes />
           </div>
         </div>
-      </div>
+      )}
 
       {/* Offers Section */}
       <div className="py-16 px-4 bg-muted">
