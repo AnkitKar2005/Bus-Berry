@@ -98,6 +98,26 @@ const Booking = () => {
         return;
       }
 
+      // First, attempt to book seats atomically
+      const { data: seatsBooked, error: bookSeatsError } = await supabase.rpc(
+        'book_seats_atomic',
+        {
+          p_schedule_id: bus.scheduleId,
+          p_seat_count: selectedSeats.length
+        }
+      );
+
+      if (bookSeatsError) {
+        console.error('Seat booking error:', bookSeatsError);
+        toast.error("Failed to reserve seats. Please try again.");
+        return;
+      }
+
+      if (!seatsBooked) {
+        toast.error("Sorry, the selected seats are no longer available. Please try booking again.");
+        return;
+      }
+
       // Generate booking reference
       const bookingRef = `BUS-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       
@@ -110,7 +130,7 @@ const Booking = () => {
         date: bus.date,
       });
 
-      // Insert booking into database
+      // Insert booking into database with pending status
       const { data: bookingData, error: bookingError } = await supabase
         .from('bookings')
         .insert({
@@ -122,8 +142,8 @@ const Booking = () => {
           passenger_phone: contactInfo.phone,
           seat_numbers: selectedSeats,
           total_fare: finalAmount,
-          status: 'confirmed',
-          payment_verified: true,
+          status: 'pending',
+          payment_verified: false,
           qr_code_data: qrData,
         })
         .select()
@@ -131,21 +151,26 @@ const Booking = () => {
 
       if (bookingError) throw bookingError;
 
-      // Update available seats
-      const { error: updateError } = await supabase
-        .from('schedules')
-        .update({ 
-          available_seats: bus.availableSeats - selectedSeats.length 
-        })
-        .eq('id', bus.scheduleId);
+      // Create payment record
+      const { error: paymentError } = await supabase
+        .from('payments')
+        .insert({
+          booking_id: bookingData.id,
+          amount: finalAmount,
+          payment_method: paymentMethod,
+          status: 'pending',
+        });
 
-      if (updateError) throw updateError;
+      if (paymentError) throw paymentError;
 
-      toast.success("Payment successful! Booking confirmed!");
+      // TODO: Integrate with actual payment gateway
+      // For now, simulate payment success after a delay
+      toast.success("Booking created! Payment processing...");
+      
       setTimeout(() => {
         navigate('/account', { 
           state: { 
-            bookingConfirmed: true, 
+            bookingConfirmed: false, 
             bookingDetails: {
               ...bookingData,
               bus,

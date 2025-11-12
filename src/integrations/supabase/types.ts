@@ -544,6 +544,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_seats_atomic: {
+        Args: { p_schedule_id: string; p_seat_count: number }
+        Returns: boolean
+      }
       can_cancel_booking: { Args: { booking_id: string }; Returns: boolean }
       generate_booking_reference: { Args: never; Returns: string }
       get_analytics_stats: {
@@ -568,6 +572,10 @@ export type Database = {
       setup_admin_user: {
         Args: { admin_email: string; admin_password: string }
         Returns: string
+      }
+      verify_payment: {
+        Args: { p_booking_id: string; p_transaction_id: string }
+        Returns: boolean
       }
     }
     Enums: {

@@ -1,42 +1,13 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Shield, Check, AlertCircle } from "lucide-react";
+import { Shield, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const AdminSetup = () => {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
   const navigate = useNavigate();
-
-  const handleSetup = async () => {
-    try {
-      setLoading(true);
-      setResult(null);
-
-      const { data, error } = await supabase.functions.invoke("setup-admin", {
-        body: {},
-      });
-
-      if (error) {
-        toast.error("Setup failed: " + error.message);
-        return;
-      }
-
-      setResult(data);
-      
-      if (data.success) {
-        toast.success("Admin setup completed successfully!");
-      }
-    } catch (error: any) {
-      toast.error("Setup failed: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
@@ -49,82 +20,50 @@ const AdminSetup = () => {
           </div>
           <CardTitle className="text-2xl font-bold">Admin Setup</CardTitle>
           <CardDescription>
-            One-time setup to create the admin account
+            Secure admin account configuration
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Important:</strong> This setup should only be run once to create the admin account.
-              After setup, use the Admin Login page to access the admin panel.
+              <strong>Admin Setup Secured:</strong> Admin account creation has been secured and requires 
+              backend configuration. Please contact your system administrator to set up the admin account.
             </AlertDescription>
           </Alert>
 
           <div className="space-y-4">
             <div className="bg-muted p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Admin Credentials</h3>
-              <div className="space-y-1 text-sm">
-                <p><strong>Email:</strong> admin@busbooker.com</p>
-                <p><strong>Password:</strong> BusBooker@Admin2024!</p>
-              </div>
+              <h3 className="font-semibold mb-2">Security Improvements</h3>
+              <ul className="space-y-2 text-sm list-disc list-inside">
+                <li>Admin credentials are no longer hardcoded</li>
+                <li>Function requires service role authentication</li>
+                <li>Password complexity requirements enforced</li>
+                <li>Prevents unauthorized admin account creation</li>
+              </ul>
             </div>
 
-            <Alert className="bg-yellow-500/10 border-yellow-500/50">
-              <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-              <AlertDescription className="text-yellow-600 dark:text-yellow-400">
-                <strong>Security Note:</strong> After logging in for the first time, 
-                change the admin password immediately through your account settings.
+            <Alert className="bg-blue-500/10 border-blue-500/50">
+              <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-blue-600 dark:text-blue-400">
+                <strong>For Administrators:</strong> Use the backend dashboard to configure 
+                the admin account using the secure setup process.
               </AlertDescription>
             </Alert>
           </div>
 
-          {result && (
-            <Alert className={result.success ? "bg-green-500/10 border-green-500/50" : "bg-red-500/10 border-red-500/50"}>
-              {result.success ? (
-                <>
-                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <AlertDescription className="text-green-600 dark:text-green-400">
-                    <strong>Success!</strong> {result.message}
-                  </AlertDescription>
-                </>
-              ) : (
-                <>
-                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
-                  <AlertDescription className="text-red-600 dark:text-red-400">
-                    <strong>Error:</strong> {result.error || result.message}
-                  </AlertDescription>
-                </>
-              )}
-            </Alert>
-          )}
-
-          <div className="flex gap-4">
-            <Button 
-              onClick={handleSetup} 
-              disabled={loading || (result?.success)}
-              className="flex-1"
+          <div className="text-center space-y-2">
+            <Button
+              onClick={() => navigate("/admin/login")}
+              className="w-full"
             >
-              {loading ? "Setting up..." : result?.success ? "Setup Complete" : "Run Admin Setup"}
+              Go to Admin Login
             </Button>
-            
-            {result?.success && (
-              <Button 
-                onClick={() => navigate("/admin/login")}
-                variant="outline"
-                className="flex-1"
-              >
-                Go to Admin Login
-              </Button>
-            )}
-          </div>
-
-          <div className="text-center">
             <Button
               type="button"
               variant="ghost"
               onClick={() => navigate("/")}
-              className="text-sm"
+              className="w-full"
             >
               Back to Home
             </Button>

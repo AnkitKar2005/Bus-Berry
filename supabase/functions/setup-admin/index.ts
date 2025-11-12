@@ -12,25 +12,69 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // SECURITY: This function requires service role authentication
+    const authHeader = req.headers.get("Authorization");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    // Verify that request is using service role key
+    if (!authHeader || !authHeader.includes(serviceRoleKey)) {
+      console.error("Unauthorized: Service role key required");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Unauthorized: This function requires service role access",
+        }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
     });
 
-    // Admin credentials - CHANGE THESE BEFORE FIRST RUN
-    const ADMIN_EMAIL = "admin@busbooker.com";
-    const ADMIN_PASSWORD = "BusBooker@Admin2024!";
+    // Get admin credentials from request body
+    const { adminEmail, adminPassword } = await req.json();
+
+    if (!adminEmail || !adminPassword) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Admin email and password are required",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Validate password strength
+    if (adminPassword.length < 12) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Password must be at least 12 characters long",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
 
     console.log("Checking for existing admin user...");
 
     // Check if admin user already exists
     const { data: existingUser } = await supabaseAdmin.auth.admin.listUsers();
-    const adminExists = existingUser.users.find((u) => u.email === ADMIN_EMAIL);
+    const adminExists = existingUser.users.find((u) => u.email === adminEmail);
 
     if (adminExists) {
       console.log("Admin user already exists");
@@ -55,7 +99,6 @@ serve(async (req) => {
         console.log("Admin role assigned");
       }
 
-      // Return generic message to prevent user enumeration
       return new Response(
         JSON.stringify({
           success: true,
@@ -69,8 +112,8 @@ serve(async (req) => {
 
     // Create admin user
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-      email: ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
+      email: adminEmail,
+      password: adminPassword,
       email_confirm: true,
       user_metadata: {
         full_name: "System Administrator",
@@ -95,7 +138,6 @@ serve(async (req) => {
 
     console.log("Admin setup complete");
 
-    // Return generic message to prevent user enumeration
     return new Response(
       JSON.stringify({
         success: true,
