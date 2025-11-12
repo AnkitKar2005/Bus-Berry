@@ -55,11 +55,11 @@ serve(async (req) => {
         console.log("Admin role assigned");
       }
 
+      // Return generic message to prevent user enumeration
       return new Response(
         JSON.stringify({
           success: true,
-          message: "Admin user already exists and is configured",
-          email: ADMIN_EMAIL,
+          message: "Admin setup request processed successfully",
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -95,12 +95,11 @@ serve(async (req) => {
 
     console.log("Admin setup complete");
 
+    // Return generic message to prevent user enumeration
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Admin user created successfully",
-        email: ADMIN_EMAIL,
-        note: "IMPORTANT: Change the admin password immediately after first login!",
+        message: "Admin setup request processed successfully",
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

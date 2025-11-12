@@ -86,7 +86,6 @@ const AdminSetup = () => {
                   <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertDescription className="text-green-600 dark:text-green-400">
                     <strong>Success!</strong> {result.message}
-                    {result.note && <div className="mt-2">{result.note}</div>}
                   </AlertDescription>
                 </>
               ) : (
