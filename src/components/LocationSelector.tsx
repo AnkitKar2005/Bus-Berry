@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "@/contexts/LocationContext";
+import { useGeolocation } from "@/hooks/useGeolocation";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
@@ -9,11 +10,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Globe, MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 interface Country {
   id: string;
   name: string;
   code: string;
+  currency_code?: string;
+  currency_symbol?: string;
+  exchange_rate?: number;
 }
 
 interface State {
@@ -24,12 +29,28 @@ interface State {
 
 const LocationSelector = () => {
   const { selectedCountry, selectedState, setSelectedCountry, setSelectedState } = useLocation();
+  const { location, loading: geoLoading } = useGeolocation();
   const [countries, setCountries] = useState<Country[]>([]);
   const [states, setStates] = useState<State[]>([]);
+  const [autoDetected, setAutoDetected] = useState(false);
 
   useEffect(() => {
     fetchCountries();
   }, []);
+
+  // Auto-detect country from geolocation
+  useEffect(() => {
+    if (location && countries.length > 0 && !autoDetected && !selectedCountry) {
+      const detectedCountry = countries.find(
+        (c) => c.code === location.countryCode
+      );
+      if (detectedCountry) {
+        setSelectedCountry(detectedCountry);
+        setAutoDetected(true);
+        toast.success(`Location detected: ${detectedCountry.name}`);
+      }
+    }
+  }, [location, countries, autoDetected, selectedCountry, setSelectedCountry]);
 
   useEffect(() => {
     if (selectedCountry) {
@@ -87,13 +108,13 @@ const LocationSelector = () => {
           value={selectedCountry?.id || ""}
           onValueChange={handleCountryChange}
         >
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="Select Country" />
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder={geoLoading ? "Detecting..." : "Select Country"} />
           </SelectTrigger>
-          <SelectContent className="bg-background">
+          <SelectContent className="bg-background max-h-[300px]">
             {countries.map((country) => (
               <SelectItem key={country.id} value={country.id}>
-                {country.name}
+                {country.name} ({country.currency_symbol})
               </SelectItem>
             ))}
           </SelectContent>

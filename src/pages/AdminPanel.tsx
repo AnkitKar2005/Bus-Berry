@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, Bus, MapPin, DollarSign, TrendingUp, AlertCircle, Shield, Trash2 } from "lucide-react";
 import Header from "@/components/Header";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import AdminMFASetup from "@/components/AdminMFASetup";
+import AuditLogViewer from "@/components/AuditLogViewer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -86,12 +88,23 @@ const AdminPanel = () => {
 
   const approveBus = async (busId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('buses')
         .update({ approval_status: 'approved' })
         .eq('id', busId);
 
       if (error) throw error;
+
+      // Log audit event
+      await supabase.rpc('log_audit_event' as any, {
+        p_actor_id: user?.id,
+        p_action: 'approve_bus',
+        p_target_type: 'bus',
+        p_target_id: busId,
+      });
+
       toast.success("Bus approved successfully");
       loadData();
     } catch (error) {
@@ -102,12 +115,23 @@ const AdminPanel = () => {
 
   const rejectBus = async (busId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('buses')
         .update({ approval_status: 'rejected' })
         .eq('id', busId);
 
       if (error) throw error;
+
+      // Log audit event
+      await supabase.rpc('log_audit_event' as any, {
+        p_actor_id: user?.id,
+        p_action: 'reject_bus',
+        p_target_type: 'bus',
+        p_target_id: busId,
+      });
+
       toast.success("Bus rejected");
       loadData();
     } catch (error) {
@@ -120,12 +144,23 @@ const AdminPanel = () => {
     if (!confirm('Are you sure you want to delete this bus? This action cannot be undone.')) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { error } = await supabase
         .from('buses')
         .delete()
         .eq('id', busId);
 
       if (error) throw error;
+
+      // Log audit event
+      await supabase.rpc('log_audit_event' as any, {
+        p_actor_id: user?.id,
+        p_action: 'delete_bus',
+        p_target_type: 'bus',
+        p_target_id: busId,
+      });
+
       toast.success("Bus deleted successfully");
       loadData();
     } catch (error) {
@@ -138,6 +173,8 @@ const AdminPanel = () => {
     if (!confirm('Are you sure you want to delete this user account?')) return;
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       // Delete user profile (auth.users will be cascaded via trigger)
       const { error } = await supabase
         .from('profiles')
@@ -145,6 +182,15 @@ const AdminPanel = () => {
         .eq('id', userId);
 
       if (error) throw error;
+
+      // Log audit event
+      await supabase.rpc('log_audit_event' as any, {
+        p_actor_id: user?.id,
+        p_action: 'delete_user',
+        p_target_type: 'user',
+        p_target_id: userId,
+      });
+
       toast.success("User account deleted");
       loadData();
     } catch (error) {
@@ -254,10 +300,12 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="buses">Bus Management</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="audit">Audit Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="analytics">
@@ -558,6 +606,16 @@ const AdminPanel = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <h2 className="text-xl font-semibold mb-4">Security Settings</h2>
+            <AdminMFASetup />
+          </TabsContent>
+
+          <TabsContent value="audit" className="space-y-6">
+            <h2 className="text-xl font-semibold mb-4">Audit Logs</h2>
+            <AuditLogViewer />
           </TabsContent>
         </Tabs>
       </div>

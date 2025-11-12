@@ -4,6 +4,9 @@ interface Country {
   id: string;
   name: string;
   code: string;
+  currency_code?: string;
+  currency_symbol?: string;
+  exchange_rate?: number;
 }
 
 interface State {
@@ -17,6 +20,7 @@ interface LocationContextType {
   selectedState: State | null;
   setSelectedCountry: (country: Country | null) => void;
   setSelectedState: (state: State | null) => void;
+  convertPrice: (price: number) => { amount: number; symbol: string };
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
@@ -48,6 +52,15 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [selectedState]);
 
+  const convertPrice = (price: number) => {
+    const exchangeRate = selectedCountry?.exchange_rate || 1.0;
+    const symbol = selectedCountry?.currency_symbol || "$";
+    return {
+      amount: price * exchangeRate,
+      symbol,
+    };
+  };
+
   return (
     <LocationContext.Provider
       value={{
@@ -55,6 +68,7 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
         selectedState,
         setSelectedCountry,
         setSelectedState,
+        convertPrice,
       }}
     >
       {children}

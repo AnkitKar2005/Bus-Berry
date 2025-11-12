@@ -56,15 +56,36 @@ const Booking = () => {
     ));
   };
 
-  const applyCoupon = () => {
-    if (couponCode === "FIRST10") {
-      setDiscount(totalAmount * 0.1);
-      toast.success("Coupon applied! 10% discount");
-    } else if (couponCode === "SAVE20") {
-      setDiscount(totalAmount * 0.2);
-      toast.success("Coupon applied! 20% discount");
-    } else {
-      toast.error("Invalid coupon code");
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please login to apply coupon");
+        return;
+      }
+
+      const { data, error }: any = await supabase.rpc("validate_and_apply_coupon" as any, {
+        p_coupon_code: couponCode.toUpperCase(),
+        p_user_id: user.id,
+        p_total_fare: totalAmount,
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setDiscount(data.discount_amount);
+        toast.success(`Coupon applied! Discount: $${data.discount_amount.toFixed(2)}`);
+      } else {
+        toast.error(data.error);
+      }
+    } catch (error: any) {
+      console.error("Coupon validation error:", error);
+      toast.error("Failed to apply coupon");
     }
   };
 
@@ -95,6 +116,20 @@ const Booking = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast.error("Please log in to complete booking");
+        return;
+      }
+
+      // Check rate limit
+      const { data: rateLimitOk }: any = await supabase.rpc("check_rate_limit" as any, {
+        p_user_id: user.id,
+        p_ip_address: null,
+        p_endpoint: "booking",
+        p_max_requests: 5,
+        p_window_minutes: 10,
+      });
+
+      if (!rateLimitOk) {
+        toast.error("Too many booking attempts. Please try again later.");
         return;
       }
 
@@ -323,8 +358,8 @@ const Booking = () => {
                     Apply
                   </Button>
                 </div>
-                <div className="mt-2 text-xs text-gray-500">
-                  Try: FIRST10 or SAVE20
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Enter coupon code for discounts
                 </div>
               </CardContent>
             </Card>
