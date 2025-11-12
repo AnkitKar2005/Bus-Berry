@@ -108,10 +108,36 @@ const BusRegistrationForm = () => {
     const files = event.target.files;
     if (!files) return;
 
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
     const uploadedImages = [];
     for (let i = 0; i < Math.min(files.length, 5 - formData.images.length); i++) {
       const file = files[i];
-      const fileName = `${Date.now()}-${file.name}`;
+
+      // Validate file type
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: `${file.name} is not allowed. Only JPEG, PNG, and WebP images are accepted.`,
+          variant: "destructive"
+        });
+        continue;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds 5MB limit. Please choose a smaller file.`,
+          variant: "destructive"
+        });
+        continue;
+      }
+
+      // Sanitize filename
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const fileName = `${Date.now()}-${sanitizedName}`;
       
       try {
         const { data, error } = await supabase.storage
@@ -120,6 +146,11 @@ const BusRegistrationForm = () => {
         
         if (error) {
           console.error('Upload error:', error);
+          toast({
+            title: "Upload failed",
+            description: `Failed to upload ${file.name}`,
+            variant: "destructive"
+          });
           continue;
         }
         
@@ -130,13 +161,24 @@ const BusRegistrationForm = () => {
         uploadedImages.push(publicUrl);
       } catch (error) {
         console.error('Error uploading image:', error);
+        toast({
+          title: "Upload error",
+          description: `An error occurred while uploading ${file.name}`,
+          variant: "destructive"
+        });
       }
     }
 
-    setFormData(prev => ({
-      ...prev,
-      images: [...prev.images, ...uploadedImages]
-    }));
+    if (uploadedImages.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...uploadedImages]
+      }));
+      toast({
+        title: "Success",
+        description: `${uploadedImages.length} image(s) uploaded successfully`
+      });
+    }
   };
 
   const removeImage = (index: number) => {

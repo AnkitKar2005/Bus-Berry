@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.setup-admin]
 verify_jwt = false
+
+[functions.generate-ticket-qr]
+verify_jwt = false
+
+[functions.verify-ticket-qr]
+verify_jwt = false

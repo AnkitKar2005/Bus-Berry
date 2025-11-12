@@ -75,6 +75,20 @@ const QRScanner = () => {
         return;
       }
 
+      // Verify QR code signature if QR data exists
+      if (data.qr_code_data) {
+        const { data: verificationResult, error: verifyError } = await supabase.functions.invoke(
+          'verify-ticket-qr',
+          { body: { qrData: data.qr_code_data } }
+        );
+
+        if (verifyError || !verificationResult?.valid) {
+          toast.error("Invalid or tampered QR code");
+          setBooking(null);
+          return;
+        }
+      }
+
       // Check if booking is valid (not expired and not cancelled)
       const journeyDate = new Date(data.schedule.departure_date);
       const today = new Date();
