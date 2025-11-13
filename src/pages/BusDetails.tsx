@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, Clock, Star, Users, Wifi, Car, CheckCircle } from "lucide-react";
 import Header from "@/components/Header";
 import ReviewsList from "@/components/ReviewsList";
+import CurrencyDisplay from "@/components/CurrencyDisplay";
 
 const BusDetails = () => {
   const { id } = useParams();
@@ -144,7 +145,9 @@ const BusDetails = () => {
               </div>
 
               <div className="text-right">
-                <div className="text-3xl font-bold text-primary">${bus.price}</div>
+                <div className="text-3xl font-bold text-primary">
+                  <CurrencyDisplay amount={bus.price} />
+                </div>
                 <div className="text-muted-foreground">per seat</div>
               </div>
             </div>
@@ -267,7 +270,9 @@ const BusDetails = () => {
                   <hr />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total Amount:</span>
-                    <span>${totalAmount + Math.round(totalAmount * 0.1)}</span>
+                    <span>
+                      <CurrencyDisplay amount={totalAmount + Math.round(totalAmount * 0.1)} />
+                    </span>
                   </div>
                 </div>
 

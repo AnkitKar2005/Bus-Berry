@@ -10,6 +10,7 @@ import { MapPin, Clock, Star, Users, Wifi, Car } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import AdvancedSearchFilters from "@/components/AdvancedSearchFilters";
+import CurrencyDisplay from "@/components/CurrencyDisplay";
 
 const SearchResults = () => {
   const [searchParams] = useSearchParams();
@@ -228,7 +229,9 @@ const SearchResults = () => {
                     {/* Price and Book */}
                     <div className="flex flex-col justify-between">
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">${bus.price}</div>
+                        <div className="text-2xl font-bold text-primary">
+                          <CurrencyDisplay amount={bus.price} />
+                        </div>
                         <div className="text-sm text-muted-foreground">per person</div>
                       </div>
                       <Link to={`/bus/${bus.id}`}>
