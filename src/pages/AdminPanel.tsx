@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AdminMFASetup from "@/components/AdminMFASetup";
 import AuditLogViewer from "@/components/AuditLogViewer";
+import CouponManagement from "@/components/CouponManagement";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -463,45 +464,7 @@ const AdminPanel = () => {
           </TabsContent>
 
           <TabsContent value="coupons" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Coupon Management</h2>
-              <Button>Create New Coupon</Button>
-            </div>
-
-            <div className="grid gap-4">
-              {coupons.map((coupon) => (
-                <Card key={coupon.id}>
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">{coupon.code}</h3>
-                          <Badge variant={coupon.status === 'active' ? 'default' : 'secondary'}>
-                            {coupon.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-                          <div>
-                            <p>Discount: {coupon.discount}%</p>
-                            <p>Expiry: {coupon.expiryDate}</p>
-                          </div>
-                          <div>
-                            <p>Usage: {coupon.usedCount}/{coupon.maxUses}</p>
-                            <p>Success Rate: {Math.round((coupon.usedCount / coupon.maxUses) * 100)}%</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm" variant="outline">
-                          {coupon.status === 'active' ? 'Deactivate' : 'Activate'}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <CouponManagement />
           </TabsContent>
 
           <TabsContent value="analytics">
