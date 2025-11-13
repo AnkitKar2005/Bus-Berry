@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,19 @@ const Booking = () => {
   const [couponCode, setCouponCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [discount, setDiscount] = useState(0);
+  const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const updatePassenger = (index: number, field: string, value: string) => {
     setPassengers(prev => prev.map((p, i) => 
@@ -79,7 +92,8 @@ const Booking = () => {
 
       if (data.success) {
         setDiscount(data.discount_amount);
-        toast.success(`Coupon applied! Discount: $${data.discount_amount.toFixed(2)}`);
+        setAppliedCouponId(data.coupon_id);
+        toast.success(`Coupon applied! Discount: ₹${data.discount_amount.toFixed(2)}`);
       } else {
         toast.error(data.error);
       }
@@ -199,24 +213,104 @@ const Booking = () => {
         toast.error("Booking created but QR generation failed");
       }
 
-      // TODO: Integrate with actual payment gateway (Stripe, PayPal, Razorpay)
-      // Current flow creates booking but requires manual payment verification
-      toast.success("Booking created! Please complete payment to confirm.");
-      
-      setTimeout(() => {
-        navigate('/account', { 
-          state: { 
-            bookingConfirmed: false, 
-            bookingDetails: {
-              ...bookingData,
-              bus,
-              passengers,
-              selectedSeats,
-              bookingId: bookingData.id,
-            }
-          } 
-        });
-      }, 1500);
+      // Record coupon application if coupon was used
+      if (appliedCouponId && discount > 0) {
+        const { error: couponAppError }: any = await supabase
+          .from('coupon_applications' as any)
+          .insert({
+            coupon_id: appliedCouponId,
+            user_id: user.id,
+            booking_id: bookingData.id,
+            discount_amount: discount,
+          } as any);
+
+        if (couponAppError) {
+          console.error('Error recording coupon application:', couponAppError);
+        }
+      }
+
+      // Initiate Razorpay payment
+      await initiateRazorpayPayment(bookingData.id, finalAmount, bookingData);
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      toast.error("Payment initiation failed. Please try again.");
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const initiateRazorpayPayment = async (bookingId: string, amount: number, bookingData: any) => {
+    try {
+      setIsProcessingPayment(true);
+
+      // Create Razorpay order via edge function
+      const { data: orderData, error: orderError } = await supabase.functions.invoke(
+        'create-razorpay-order',
+        {
+          body: {
+            bookingId,
+            amount,
+            currency: 'INR'
+          }
+        }
+      );
+
+      if (orderError) throw orderError;
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Bus Booking System',
+        description: `Booking Reference: ${bookingData.booking_reference}`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          // Payment successful - verify on backend
+          const { error: verifyError } = await supabase.rpc('verify_payment', {
+            p_booking_id: bookingId,
+            p_transaction_id: response.razorpay_payment_id
+          });
+
+          if (verifyError) {
+            console.error('Payment verification error:', verifyError);
+            toast.error("Payment verification failed. Please contact support.");
+          } else {
+            toast.success("Payment successful! Your booking is confirmed.");
+            setTimeout(() => {
+              navigate('/account', {
+                state: {
+                  bookingConfirmed: true,
+                  bookingDetails: {
+                    ...bookingData,
+                    bus,
+                    passengers,
+                    selectedSeats,
+                    bookingId: bookingData.id,
+                  }
+                }
+              });
+            }, 1500);
+          }
+          setIsProcessingPayment(false);
+        },
+        prefill: {
+          name: passengers[0].name,
+          email: contactInfo.email,
+          contact: contactInfo.phone
+        },
+        theme: {
+          color: '#3399cc'
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error("Payment cancelled. Your booking will expire in 15 minutes if not paid.");
+            setIsProcessingPayment(false);
+            navigate('/account');
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
     } catch (error) {
       console.error('Booking error:', error);
       toast.error("Failed to complete booking. Please try again.");
@@ -421,9 +515,10 @@ const Booking = () => {
                   className="w-full mt-6" 
                   size="lg"
                   onClick={handleBooking}
+                  disabled={isProcessingPayment}
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Confirm Booking - ${finalAmount}
+                  {isProcessingPayment ? 'Processing...' : `Confirm Booking & Pay - ₹${finalAmount}`}
                 </Button>
               </CardContent>
             </Card>
